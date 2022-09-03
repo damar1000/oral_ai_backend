@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\UserHistoryResource;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class UserHistoryController extends Controller
@@ -53,7 +55,7 @@ class UserHistoryController extends Controller
     ]);
 
     // If Validation Failed
-    if($validator->fails()){
+    if ($validator->fails()) {
       return response()->json([
         'message' => $validator->errors(),
         'data' => [],
@@ -62,11 +64,11 @@ class UserHistoryController extends Controller
     }
 
     // Store Image
-    if($request->hasFile('file_path')){
+    if ($request->hasFile('file_path')) {
 
       // Store image locally
       $image = $request->file('file_path');
-      $image->storeAs('data/'.Auth::user()->id.'/history', $image->hashName());
+      $image->storeAs('public/' . Auth::user()->id . '/history', $image->hashName());
 
       // Create User History
       $userHistory = UserHistory::create([
@@ -90,12 +92,13 @@ class UserHistoryController extends Controller
    */
   public function show(UserHistory $userHistory)
   {
-    // Get User History
-    return response()->json([
-      'message' => 'Success retrieving data',
-      'data' => new UserHistoryResource($userHistory),
-      'success' => true
-    ]);
+    // Get User History With Picture
+    $data = UserHistory::find($userHistory->id)->first();
+
+    // Return Response
+    $userHistoryResource = new UserHistoryResource($data);
+
+    return Storage::disk('public')->get('/' . Auth::user()->id . '/history/' . $userHistoryResource->file_path);
   }
 
   /**
@@ -133,7 +136,7 @@ class UserHistoryController extends Controller
     $userHistory->delete();
 
     // Delete Image
-    Storage::delete('data/'.Auth::user()->id.'/history/'.$userHistory->file_path);
+    Storage::delete('public/' . Auth::user()->id . '/history/' . $userHistory->file_path);
 
     return response()->json([
       'message' => 'Success deleting data',
