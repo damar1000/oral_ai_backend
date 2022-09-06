@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -43,7 +44,7 @@ class AuthController extends Controller
       'data' => $user,
       'token' => $token,
       'token_type' => 'Bearer'
-    ]);
+    ], Response::HTTP_CREATED);
   }
 
   // Function Login
@@ -61,8 +62,8 @@ class AuthController extends Controller
     // If Login Failed
     if(!Auth::attempt(array($username => $req->username, 'password' => $req->password))){
       return response()->json([
-        'message' => 'Unauthorized'
-      ], 401);
+        'message' => 'Username or Password is incorrect!'
+      ], Response::HTTP_UNAUTHORIZED);
     }
 
     // Check user
@@ -76,18 +77,18 @@ class AuthController extends Controller
       'message' => 'Login Success',
       'token' => $token,
       'token_type' => 'Bearer'
-    ]);
+    ], Response::HTTP_OK);
   }
 
   // Function Logout
   public function logout()
   {
     // Revoke Token
-    Auth::user()->tokens()->delete();
+    auth()->user()->tokens()->delete();
     
     // Response
     return response()->json([
       'message' => 'Logout Success'
-    ]);
+    ], Response::HTTP_OK);
   }
 }

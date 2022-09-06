@@ -16,14 +16,17 @@ use App\Http\Controllers\Api\UserHistoryController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-  return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//   return $request->user();
+// });
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
+  Route::get('/user', function (Request $request) {
+    return $request->user();
+  })->name('user');
   Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
   Route::resource('/user-history', UserHistoryController::class);
