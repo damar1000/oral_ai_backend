@@ -30,4 +30,5 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
   Route::resource('/user-history', UserHistoryController::class);
+  // Route::get('/user-history/user', [UserHistoryController::class, 'getUserHistory'])->name('user-history.getUserHistory');
 });

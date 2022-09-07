@@ -22,7 +22,7 @@ class UserHistoryController extends Controller
   public function index()
   {
     // Get All User History
-    $userHistories = UserHistory::latest()->get();
+    $userHistories = UserHistory::find(Auth::user()->id);
     return response()->json([
       'message' => 'Success retrieving data',
       'data' => $userHistories,
@@ -93,12 +93,13 @@ class UserHistoryController extends Controller
   public function show(UserHistory $userHistory)
   {
     // Get User History With Picture
-    $data = UserHistory::find($userHistory->id)->first();
+    $data = UserHistory::find($userHistory->id);
 
     // Return Response
     $userHistoryResource = new UserHistoryResource($data);
 
-    return Storage::disk('public')->get('/' . Auth::user()->id . '/history/' . $userHistoryResource->file_path);
+    $img = Storage::disk('public')->get('/' . $userHistoryResource->user_id . '/history/' . $userHistoryResource->file_path);
+    return response($img, 200)->header('Content-Type', 'image/jpeg');
   }
 
   /**
