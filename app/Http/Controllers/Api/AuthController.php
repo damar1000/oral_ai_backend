@@ -24,16 +24,23 @@ class AuthController extends Controller
     ]);
 
     // If Validation Failed
-    if($validator->fails()){
+    if ($validator->fails()) {
       return response()->json($validator->errors());
+    }
+
+    // If username has been registered
+    if(User::where('username', $req->username)->first()){
+      return response()->json([
+        'message' => 'Username has been registered'
+      ], Response::HTTP_NOT_ACCEPTABLE);
     }
 
     // Create user if validate
     $user = User::create([
-      'username' => $req->username, 
+      'username' => $req->username,
       'name' => $req->name,
       'email' => $req->email,
-      'password' => Hash::make($req->password) 
+      'password' => Hash::make($req->password)
     ]);
 
     // Create Token
@@ -60,7 +67,7 @@ class AuthController extends Controller
     $username = filter_var($req->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
     // If Login Failed
-    if(!Auth::attempt(array($username => $req->username, 'password' => $req->password))){
+    if (!Auth::attempt(array($username => $req->username, 'password' => $req->password))) {
       return response()->json([
         'message' => 'Username or Password is incorrect!'
       ], Response::HTTP_UNAUTHORIZED);
@@ -84,8 +91,8 @@ class AuthController extends Controller
   public function logout()
   {
     // Revoke Token
-    auth()->user()->tokens()->delete();
-    
+    Auth::user()->tokens()->delete();
+
     // Response
     return response()->json([
       'message' => 'Logout Success'
